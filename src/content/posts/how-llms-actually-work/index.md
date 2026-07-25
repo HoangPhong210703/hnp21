@@ -8,7 +8,7 @@ draft: false
 annotation: ""
 ---
 
-> **Quy ước thuật ngữ:** Các thuật ngữ technical (kỹ thuật) quan trọng được giữ bằng tiếng Anh, kèm nghĩa tiếng Việt trong ngoặc ở lần xuất hiện phù hợp.
+> **Quy ước thuật ngữ:** Các thuật ngữ technical quan trọng được giữ bằng tiếng Anh, kèm nghĩa tiếng Việt trong ngoặc ở lần xuất hiện đầu tiên.
 
 Bài viết này là phần hướng dẫn từng bước về cách **LLM — Large Language Model (mô hình ngôn ngữ lớn)** hoạt động. Các LLM hiện đại chủ yếu được xây dựng bằng cách xếp chồng nhiều **transformer block (khối transformer)** lên nhau. Vì vậy, hiểu được cơ chế của **transformer** sẽ giúp bạn nắm được phần lớn cách LLM vận hành.
 
