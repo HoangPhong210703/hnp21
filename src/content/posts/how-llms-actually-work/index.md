@@ -35,9 +35,9 @@ Trong suốt bài viết sẽ có các phần giải thích ngắn để ngườ
 
 ![Toàn bộ transformer pipeline](transformer-pipeline.png "Tổng quan toàn bộ transformer pipeline — các phần bên dưới sẽ đi qua từng thành phần một.")
 
-## 1. Tokenization (phân tách token)
+## 1. Tokenization
 
-Mô hình không trực tiếp đọc văn bản. Chúng đọc các **integer ID (mã số nguyên)**. Bước chuyển câu lệnh của bạn thành một dãy số nguyên được gọi là **tokenization (phân tách token)**.
+Mô hình không trực tiếp đọc văn bản. Chúng đọc các **integer ID (mã số nguyên)**. Bước chuyển câu lệnh của bạn thành một dãy số nguyên được gọi là **tokenization**.
 
 Một **tokenizer (bộ phân tách token)** nhận vào một chuỗi ký tự và tạo ra một dãy số nguyên. Mỗi số nguyên trỏ tới một mục trong **vocabulary (bộ từ vựng)** cố định. Vocabulary của các LLM hiện đại thường chứa từ vài chục nghìn đến vài trăm nghìn mục.
 
@@ -48,7 +48,7 @@ Token thường không phải là một từ hoàn chỉnh. Chúng thường là
 
 Lý do là hiệu quả. Vocabulary dựa hoàn toàn trên từ nguyên vẹn sẽ quá lớn và khó khái quát hóa cho các từ mới. Vocabulary ở cấp ký tự lại quá nhỏ, khiến mô hình phải tự học từ đầu ngay cả những mẫu rất đơn giản. **Subword tokenization (phân tách token theo từ con)** nằm ở giữa hai cách này: các mảnh phổ biến nhất trở thành token riêng, còn các từ hiếm hoặc mới được ghép từ những mảnh nhỏ hơn.
 
-> **Giải thích ngắn — vocabulary (bộ từ vựng)**  
+> **Giải thích ngắn — vocabulary**  
 > Vocabulary là danh sách cố định gồm các mảnh mà tokenizer có thể nhận biết. Mỗi mảnh có một ID và mô hình chỉ có thể trực tiếp nhận các ID thuộc danh sách đó.
 
 Sự đánh đổi này xuất hiện ở những chỗ mà nhiều người không ngờ tới. Ví dụ kinh điển là hỏi một LLM có bao nhiêu chữ `r` trong từ `strawberry`. Trước đây, LLM thường trả lời sai. Đây không hẳn là thất bại trong việc đếm, mà là do mô hình không trực tiếp thao tác trên từng chữ cái. Nó chỉ xử lý các token ID, trong khi con người có thể tự nhiên tách từ đó thành từng ký tự.
@@ -61,18 +61,18 @@ Khi prompt đã trở thành một dãy số nguyên, bước tiếp theo là cu
 
 ---
 
-## 2. Embeddings (biểu diễn nhúng)
+## 2. Embeddings
 
 Một token ID như `1024` chỉ là chỉ số của một hàng. Bản thân nó không mang ý nghĩa. Thành phần cung cấp ý nghĩa cho nó là một bảng rất lớn gọi là **embedding matrix (ma trận nhúng)**.
 
 Mỗi mô hình đều có một embedding matrix. Ma trận này có một hàng cho mỗi mục trong vocabulary, và mỗi hàng là một **vector (véc-tơ)** dài gồm nhiều con số. Độ dài của mỗi hàng được gọi là **hidden size (kích thước ẩn)** của mô hình. Trong nhiều mô hình thuộc lớp 7B, mỗi token có thể được biểu diễn bằng 4.096 số. Các mô hình lớn hơn thường sử dụng vector rộng hơn.
 
-> **Giải thích ngắn — vector (véc-tơ)**  
+> **Giải thích ngắn — vector**  
 > Vector là một danh sách các con số. Trong transformer, mỗi token trở thành một vector để mô hình có thể thực hiện phép toán trên nó.
 
-Khi tokenizer chuyển một số nguyên cho mô hình, mô hình tra cứu hàng tương ứng trong embedding matrix và sử dụng vector ở hàng đó. Vector này là **embedding (biểu diễn nhúng)** của token — cách mô hình biểu diễn “ý nghĩa” của token, được học trong quá trình huấn luyện.
+Khi tokenizer chuyển một số nguyên cho mô hình, mô hình tra cứu hàng tương ứng trong embedding matrix và sử dụng vector ở hàng đó. Vector này là **embedding** của token — cách mô hình biểu diễn “ý nghĩa” của token, được học trong quá trình huấn luyện.
 
-> **Giải thích ngắn — embedding matrix (ma trận nhúng)**  
+> **Giải thích ngắn — embedding matrix**  
 > Embedding matrix là một bảng tra cứu: đầu vào là token ID, đầu ra là vector đã được học.
 
 Một đặc tính đáng chú ý là các token có ý nghĩa gần nhau thường có vector gần nhau trong không gian. Vector của `king` nằm gần vector của `queen`, còn vector của `Paris` nằm gần `France`. Không có quan hệ nào trong số này được lập trình cứng. Chúng xuất hiện từ quá trình huấn luyện trên lượng văn bản đủ lớn, bởi mô hình học được rằng những vị trí như vậy giúp nó dự đoán văn bản tốt hơn.
@@ -89,17 +89,17 @@ Hình học của **embedding space (không gian nhúng)** chứa cấu trúc ng
 
 Cần làm rõ rằng ở giai đoạn này, mỗi token đã được thay bằng embedding của nó, nhưng embedding riêng lẻ không cho biết token nằm ở đâu trong chuỗi. Vector của `dog` vẫn giống nhau dù `dog` là từ đầu tiên hay từ thứ năm trong prompt. Đây là một vấn đề.
 
-**Positional encoding (mã hóa vị trí)** được dùng để lấp khoảng trống này.
+**Positional encoding** được dùng để lấp khoảng trống này.
 
 ---
 
-## 3. Positional encoding (mã hóa vị trí)
+## 3. Positional encoding
 
 **Self-attention (cơ chế tự chú ý)** thuần túy không có sẵn biểu diễn về thứ tự từ. Nếu không có tín hiệu vị trí, mô hình không có cách trực tiếp để biết `dog` xuất hiện trước `bites` hay sau nó.
 
 Thứ tự từ có thể thay đổi ý nghĩa. Vì vậy, mô hình cần một cơ chế đưa vị trí của mỗi token vào phép tính.
 
-> **Giải thích ngắn — positional encoding (mã hóa vị trí)**  
+> **Giải thích ngắn — positional encoding**  
 > Positional encoding cung cấp thông tin về thứ tự, cho mô hình biết mỗi token nằm ở đâu trong chuỗi.
 
 Bài báo transformer gốc của Vaswani và cộng sự năm 2017 thực hiện điều này bằng cách gán cho mỗi vị trí một mẫu số riêng, rồi cộng trực tiếp mẫu đó vào embedding của token trước các bước xử lý khác. Vị trí 1 có một mẫu, vị trí 5 có mẫu khác và vị trí 100 lại có một mẫu khác. Các mẫu được tạo từ sóng **sine (sin)** và **cosine (cos)** ở nhiều tần số.
@@ -135,13 +135,13 @@ Khi cả ý nghĩa token và vị trí đã được mã hóa, câu hỏi tiếp
 
 ---
 
-## 4. Attention (cơ chế chú ý)
+## 4. Attention
 
-Đây là cơ chế đã tạo nên tên gọi của kiến trúc: **attention (cơ chế chú ý)**.
+Đây là cơ chế đã tạo nên tên gọi của kiến trúc: **attention**.
 
 Bên trong mỗi **transformer layer (lớp transformer)**, attention thực hiện một nhiệm vụ: cho phép mỗi token nhìn vào những token khác mà nó được phép thấy, rồi quyết định token nào quan trọng đối với bước tiếp theo.
 
-Attention thực hiện việc này bằng cách gán cho mỗi token đồng thời ba vai trò. Mỗi token được biến đổi thành ba vector mới: **Query (truy vấn)**, **Key (khóa)** và **Value (giá trị)**, thường viết tắt là **Q, K, V**.
+Attention thực hiện việc này bằng cách gán cho mỗi token đồng thời ba vai trò. Mỗi token được biến đổi thành ba vector mới: **Query**, **Key** và **Value (giá trị)**, thường viết tắt là **Q, K, V**.
 
 > **Giải thích ngắn — Q, K, V**  
 > Query có nghĩa là “tôi đang tìm kiếm điều gì”; Key là “tôi có thể khớp với điều gì”; còn Value là thông tin được sao chép khi mức độ khớp đủ mạnh.
@@ -176,7 +176,7 @@ Có một ràng buộc đặc thù đối với mô hình ngôn ngữ kiểu GPT
 
 Cơ chế này được gọi là **causal masking (mặt nạ nhân quả)**. Cách triển khai khá đơn giản: các token trong tương lai nhận điểm khớp cực thấp, khiến trọng số của chúng sau softmax gần như bằng 0.
 
-> **Giải thích ngắn — causal masking (mặt nạ nhân quả)**  
+> **Giải thích ngắn — causal masking**  
 > Causal masking che các token trong tương lai, ngăn mô hình ngôn ngữ **decoder-only (chỉ có bộ giải mã)** nhìn trước khi dự đoán token tiếp theo.
 
 ![Attention heatmap](transformer-attention-heatmap.png "Attention heatmap (bản đồ nhiệt attention) minh họa causal masking và mức chú ý cao dành cho từ cat.")
@@ -187,7 +187,7 @@ Các head này học cách nhận ra mẫu có dạng `A B … A` trong prompt v
 
 Đây là một trong những cơ chế rõ ràng nhất đã biết đứng sau **in-context learning (học trong ngữ cảnh)** — khả năng của LLM nhận ra một mẫu ngay trong prompt và tiếp tục theo mẫu đó.
 
-> **Giải thích ngắn — induction head (đầu quy nạp)**  
+> **Giải thích ngắn — induction head**  
 > Induction head là một attention head nhận ra các mẫu lặp trong prompt và giúp tiếp tục chúng.
 
 Attention có một chi phí lớn. Trong **full attention (attention đầy đủ)**, mỗi token so sánh với tất cả token mà nó được phép thấy. Vì vậy, khi độ dài prompt tăng gấp đôi, lượng công việc xấp xỉ tăng gấp bốn lần.
@@ -202,7 +202,7 @@ Tuy nhiên, một attention head chỉ cung cấp cho mô hình một góc nhìn
 
 ---
 
-## 5. Multi-head attention (cơ chế chú ý đa đầu)
+## 5. Multi-head attention
 
 Một lần chạy attention đơn lẻ chỉ cung cấp một cách để mô hình quyết định token nào quan trọng với token nào. Điều đó là chưa đủ, bởi ngôn ngữ chứa nhiều mối quan hệ diễn ra đồng thời:
 
@@ -211,9 +211,9 @@ Một lần chạy attention đơn lẻ chỉ cung cấp một cách để mô h
 - Tham chiếu xa giữa các câu.
 - Thứ tự từ và các cụm từ cục bộ.
 
-**Multi-head attention (cơ chế chú ý đa đầu)** giải quyết vấn đề này bằng cách chạy nhiều phép attention song song. Mỗi phép chạy song song hoạt động trong một không gian nhỏ riêng và được gọi là một **head (đầu chú ý)**.
+**Multi-head attention** giải quyết vấn đề này bằng cách chạy nhiều phép attention song song. Mỗi phép chạy song song hoạt động trong một không gian nhỏ riêng và được gọi là một **head (đầu chú ý)**.
 
-> **Giải thích ngắn — attention head (đầu chú ý)**  
+> **Giải thích ngắn — attention head**  
 > Một attention head là một phép attention độc lập với các phép chiếu đã học riêng của nó.
 
 Có một điểm thường bị mô tả sai, kể cả trong nhiều bài hướng dẫn: mỗi head không đơn giản nhận một lát cắt cố định từ vector token gốc.
@@ -242,7 +242,7 @@ Một mối quan tâm thực tế về chi phí đã thúc đẩy thay đổi ki
 
 Bộ nhớ này được gọi là **KV cache (bộ nhớ đệm Key–Value)** và là chi phí bộ nhớ chính khi chạy LLM với context dài.
 
-> **Giải thích ngắn — KV cache (bộ nhớ đệm Key–Value)**  
+> **Giải thích ngắn — KV cache**  
 > KV cache lưu Key và Value vector cũ trong quá trình sinh. Nó giúp mô hình không phải tính lại toàn bộ prompt mỗi khi thêm một token.
 
 Các LLM decoder-only hiện đại phần lớn sử dụng một biến thể gọi là **Grouped-Query Attention — GQA (attention truy vấn theo nhóm)**. Thay vì mỗi head có Key và Value riêng, nhiều query head được gom nhóm để dùng chung một số lượng key/value head ít hơn.
@@ -259,9 +259,9 @@ Kết quả là độ chính xác gần tương đương full multi-head attenti
 
 ---
 
-## 6. Feed-forward network (mạng truyền thẳng)
+## 6. Feed-forward network
 
-Sau khi attention hoàn tất việc trộn thông tin giữa các token, mỗi layer có một bước thứ hai ít được nhắc đến hơn: **feed-forward network — FFN (mạng truyền thẳng)**.
+Sau khi attention hoàn tất việc trộn thông tin giữa các token, mỗi layer có một bước thứ hai ít được nhắc đến hơn: **feed-forward network — FFN**.
 
 Nếu attention là quá trình các token “nói chuyện” với nhau, thì FFN là quá trình mỗi token tự thực hiện thêm xử lý. FFN chạy độc lập trên vector của từng token, không trộn thông tin giữa các token.
 
@@ -275,7 +275,7 @@ FFN thực hiện ba bước theo thứ tự:
 
 Bước phi tuyến ở giữa thực hiện một vai trò cụ thể đáng để hiểu. **Non-linearity (tính phi tuyến)** là một hàm làm “bẻ cong” đầu vào. Ví dụ đơn giản nhất là **ReLU — Rectified Linear Unit (đơn vị tuyến tính chỉnh lưu)**: nó trả về 0 cho mọi số âm và giữ nguyên các số dương.
 
-> **Giải thích ngắn — non-linearity (tính phi tuyến)**  
+> **Giải thích ngắn — non-linearity**  
 > Hàm phi tuyến ngăn mạng bị rút gọn thành một phép biến đổi tuyến tính lớn duy nhất.
 
 Nếu không có bước này, FFN chỉ là hai lớp tuyến tính xếp chồng. Nhưng việc xếp chồng các phép toán tuyến tính thuần túy sẽ bị rút gọn về mặt toán học: hai lớp tuyến tính liên tiếp tương đương một lớp tuyến tính, và một trăm lớp tuyến tính liên tiếp vẫn tương đương một lớp.
@@ -284,7 +284,7 @@ Tính phi tuyến ngăn sự rút gọn đó, cho phép FFN thực hiện phép 
 
 Transformer gốc sử dụng ReLU. GPT và BERT chuyển sang **GELU — Gaussian Error Linear Unit (đơn vị tuyến tính sai số Gaussian)**. Các mô hình hiện đại như LLaMA, Mistral và PaLM sử dụng **SwiGLU**. Cấu trúc mở rộng rồi nén được giữ nguyên, trong khi hàm phi tuyến là phần tiếp tục được cải tiến.
 
-Phần lớn **parameter (tham số)** trong một **dense transformer model (mô hình transformer dày đặc)** nằm trong FFN, không phải attention. Một phần lớn trọng số của mô hình được đặt trong các feed-forward layer.
+Phần lớn **parameter** trong một **dense transformer model (mô hình transformer dày đặc)** nằm trong FFN, không phải attention. Một phần lớn trọng số của mô hình được đặt trong các feed-forward layer.
 
 Các tham số đó không mang tính chung chung. Đây là nơi lưu giữ phần lớn cấu trúc về sự kiện và ngữ nghĩa mà mô hình đã học. Các nhà nghiên cứu phát hiện một số **neuron (nơ-ron)** trong FFN có liên hệ mạnh với những khái niệm hoặc sự kiện cụ thể.
 
@@ -307,9 +307,9 @@ Mixtral 8x7B có tổng cộng 46,7 tỷ parameter nhưng chỉ sử dụng kho�
 
 ---
 
-## 7. Residual stream (luồng phần dư) và layer normalization (chuẩn hóa lớp)
+## 7. Residual stream và layer normalization
 
-**Residual stream (luồng phần dư)** khiến mô hình hoạt động theo kiểu “cộng thêm” thay vì “thay thế”. Sau khi attention hoặc FFN chạy xong, kết quả thường không thay thế vector hiện tại của token. Nó được cộng vào vector đó theo từng vị trí:
+**Residual stream** khiến mô hình hoạt động theo kiểu “cộng thêm” thay vì “thay thế”. Sau khi attention hoặc FFN chạy xong, kết quả thường không thay thế vector hiện tại của token. Nó được cộng vào vector đó theo từng vị trí:
 
 ```text
 vector mới = vector cũ + đầu ra của sub-block
@@ -330,11 +330,11 @@ Residual connection không được phát minh cho transformer. Nó xuất phát
 
 Trong nghiên cứu interpretability hiện đại, residual stream trở thành đối tượng trung tâm. Mọi component (thành phần), mọi attention head, mọi FFN và thậm chí cả bước **unembedding (giải nhúng)** ở cuối đều đọc từ residual stream rồi ghi trở lại vào đó.
 
-Thành phần thứ hai, **layer normalization (chuẩn hóa lớp)**, tồn tại vì một lý do thực tế hơn: nếu không có nó, residual stream sẽ không ổn định. Các con số đi qua hàng chục phép cộng có xu hướng tăng bùng nổ hoặc co về gần 0. Cả hai trường hợp đều có thể làm quá trình huấn luyện thất bại.
+Thành phần thứ hai, **layer normalization**, tồn tại vì một lý do thực tế hơn: nếu không có nó, residual stream sẽ không ổn định. Các con số đi qua hàng chục phép cộng có xu hướng tăng bùng nổ hoặc co về gần 0. Cả hai trường hợp đều có thể làm quá trình huấn luyện thất bại.
 
 Layer normalization đưa vector của từng token trở về một phạm vi được kiểm soát giữa các sub-block.
 
-> **Giải thích ngắn — layer normalization (chuẩn hóa lớp)**  
+> **Giải thích ngắn — layer normalization**  
 > Layer normalization chuẩn hóa lại vector token để các con số nằm trong phạm vi ổn định trong quá trình huấn luyện.
 
 Transformer gốc năm 2017 áp dụng normalization sau mỗi sub-block, gọi là **post-norm (chuẩn hóa sau)**. Cách này hoạt động với mô hình nông nhưng trở nên khó huấn luyện ổn định khi độ sâu tăng.
@@ -357,13 +357,13 @@ RMSNorm bỏ bước dịch về 0 và chỉ giữ bước chuẩn hóa độ l�
 
 ---
 
-## 8. Next-token prediction (dự đoán token tiếp theo)
+## 8. Next-token prediction
 
 Sau khi tất cả layer attention và feed-forward hoàn tất xử lý, mô hình có một vector cho mỗi token trong chuỗi. Trong quá trình sinh văn bản, để dự đoán token tiếp theo, mô hình chỉ lấy vector cuối cùng của token cuối cùng.
 
 Vector cuối này được chuyển thành một con số cho mỗi token có thể xuất hiện tiếp theo. Nếu vocabulary có 100.000 token, mô hình tạo ra 100.000 con số. Những con số này được gọi là **logits (điểm thô)**. Chúng chưa phải xác suất và có thể mang bất kỳ giá trị dương hoặc âm nào.
 
-> **Giải thích ngắn — logits (điểm thô)**  
+> **Giải thích ngắn — logits**  
 > Logits là điểm chưa chuẩn hóa cho từng token có thể xuất hiện tiếp theo. Chúng chỉ trở thành xác suất sau khi đi qua softmax.
 
 Softmax biến logits thành **probability distribution (phân phối xác suất)** của mô hình trên toàn bộ token có thể xuất hiện tiếp theo. Đây là cùng một phép toán softmax đã xuất hiện trước đó, nhưng được sử dụng ở một vị trí khác trong mô hình.
@@ -376,7 +376,7 @@ Mô hình thường không luôn chọn token có xác suất cao nhất. Các t
 
 Đây là lý do cùng một mô hình có thể tạo cảm giác chính xác, thận trọng trong một thiết lập và sáng tạo, đa dạng hơn trong thiết lập khác.
 
-> **Giải thích ngắn — temperature (nhiệt độ)**  
+> **Giải thích ngắn — temperature**  
 > Temperature kiểm soát độ ngẫu nhiên khi lấy mẫu. Temperature thấp làm mô hình thận trọng và dễ dự đoán hơn; temperature cao làm đầu ra đa dạng hơn.
 
 Sau khi một token được chọn, nó được thêm vào input. Mô hình chạy bước tiếp theo trên chuỗi dài hơn, thường tái sử dụng KV cache để không phải tính lại toàn bộ prefix (tiền tố) từ đầu.
@@ -405,14 +405,14 @@ Một mô hình nhỏ và nhanh được dùng làm **draft model (mô hình nh�
 
 Khi triển khai đúng, phân phối đầu ra vẫn giống như chỉ chạy mô hình lớn, nhưng vòng lặp có thể nhanh hơn đáng kể.
 
-> **Giải thích ngắn — speculative decoding (giải mã suy đoán)**  
+> **Giải thích ngắn — speculative decoding**  
 > Speculative decoding dùng một mô hình nháp nhỏ để đoán trước, rồi yêu cầu mô hình lớn xác minh nhiều token dự đoán cùng lúc.
 
 Vòng lặp dự đoán token tiếp theo là phần đơn giản nhất của kiến trúc, nhưng chính nó khiến toàn bộ hệ thống hoạt động.
 
 ---
 
-## 9. Architecture (kiến trúc) so với trained weights (trọng số đã huấn luyện)
+## 9. Architecture so với trained weights
 
 Đến đây, chúng ta đã đi qua các cơ chế cốt lõi:
 
@@ -494,6 +494,6 @@ Phản hồi luôn được hoan nghênh. Nếu bạn quan tâm đến bất k�
 
 ---
 
-## Tóm tắt transformer pipeline (quy trình transformer)
+## Tóm tắt transformer pipeline
 
 ![Toàn bộ transformer pipeline](transformer-pipeline.png "Toàn bộ transformer pipeline: từ văn bản đầu vào, qua tokenizer, embeddings, các transformer layer, đến logits và token tiếp theo.")
