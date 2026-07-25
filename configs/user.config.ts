@@ -3,9 +3,9 @@ import type { UserConfig } from "../src/site.config";
 const userConfig: UserConfig = {
   title: "hnp's Blog",
   description:
-    "A minimal editorial theme for Astro built for blogs, journals, travel writing, and long-form publishing.",
+    "A personal blog about programming, technology, and career.",
 
-  url: "https://hnp21.pages.dev",
+  url: "https://hnp21.hoangphong210703.workers.dev",
   author: "hnp",
 
   logo: "/logo.svg",
